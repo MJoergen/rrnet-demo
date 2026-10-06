@@ -20,23 +20,34 @@ it will print out a line saying `reply from <ip address> after <num> seconds`.
 RR-Net is a physical cartridge with an Ethernet (RJ45) connector that allows network
 connectivity.
 
-## How to build using "as65"
-To install the "as65" assembler type
+## How to build using "ca65"
+The program is written in 6502 assembly for the "ca65" assembler, which is part of the
+cc65 tool chain. To install cc65 (including "ca65" and the "ld65" linker) type
 
 ```
 sudo apt install cc65
 ```
 
-To download the "ip65" library type
+The network stack comes from the [ip65](https://github.com/cc65/ip65) library. To download
+it and build the parts needed for the C64 with RR-Net type
 
 ```
-TODO
+git clone https://github.com/cc65/ip65.git
+make -C ip65/ip65 ip65_tcp.lib
+make -C ip65/drivers c64rrnet.lib
 ```
+
+This produces two libraries:
+* `ip65/ip65/ip65_tcp.lib` : The TCP/IP stack (ARP, IP, ICMP, UDP, TCP, DHCP, DNS, ...).
+* `ip65/drivers/c64rrnet.lib` : The driver for the CS8900A Ethernet chip in the RR-Net,
+  together with C64 helper routines for printing, keyboard input and timing.
 
 ## How to test using VICE
 
-Follow the [INSTALL.md](INSTALLL.mD) guide for instructions on how to install VICE on
+Follow the [INSTALL.md](INSTALL.md) guide for instructions on how to install VICE on
 Ubuntu 24.04 LTS.
 
 ## File overview of this repo
-
+* `README.md` : This file.
+* `INSTALL.md` : How to build VICE with Ethernet support on Ubuntu 24.04 LTS.
+* `LICENSE` : The MIT license.
