@@ -28,26 +28,45 @@ cc65 tool chain. To install cc65 (including "ca65" and the "ld65" linker) type
 sudo apt install cc65
 ```
 
-The network stack comes from the [ip65](https://github.com/cc65/ip65) library. To download
-it and build the parts needed for the C64 with RR-Net type
+The network stack comes from the [ip65](https://github.com/cc65/ip65) library, which is
+included in this repo as a git submodule. Clone the repo together with the submodule
 
 ```
-git clone https://github.com/cc65/ip65.git
-make -C ip65/ip65 ip65_tcp.lib
-make -C ip65/drivers c64rrnet.lib
+git clone --recurse-submodules https://github.com/MJoergen/rrnet-demo.git
+cd rrnet-demo
 ```
 
-This produces two libraries:
+If you already cloned the repo without the submodule, type `git submodule update --init`.
+
+To build the program type
+
+```
+make
+```
+
+This first builds the two ip65 libraries needed for the C64 with RR-Net:
 * `ip65/ip65/ip65_tcp.lib` : The TCP/IP stack (ARP, IP, ICMP, UDP, TCP, DHCP, DNS, ...).
 * `ip65/drivers/c64rrnet.lib` : The driver for the CS8900A Ethernet chip in the RR-Net,
   together with C64 helper routines for printing, keyboard input and timing.
+
+It then assembles the source files in `src/` and links everything into `rrnet-demo.prg`.
 
 ## How to test using VICE
 
 Follow the [INSTALL.md](INSTALL.md) guide for instructions on how to install VICE on
 Ubuntu 24.04 LTS.
 
+Once VICE is set up with the RR-Net enabled, start the program with
+
+```
+make run
+```
+
 ## File overview of this repo
 * `README.md` : This file.
 * `INSTALL.md` : How to build VICE with Ethernet support on Ubuntu 24.04 LTS.
 * `LICENSE` : The MIT license.
+* `Makefile` : Builds the ip65 libraries and `rrnet-demo.prg`.
+* `src/main.s` : The program source.
+* `ip65/` : The ip65 library (git submodule).
+* `.github/workflows/build.yml` : GitHub Actions job that checks the program builds.
