@@ -12,7 +12,16 @@ OBJS := $(SRCS:src/%.s=build/%.o)
 IP65LIB  := ip65/ip65/ip65_tcp.lib
 DRIVERLIB := ip65/drivers/c64rrnet.lib
 
-X64 ?= x64sc
+# VICE settings for "make run". ETH_IF is the host network interface VICE
+# uses for the emulated RR-Net. It defaults to the interface of the default
+# route. Override it if needed, e.g. "make run ETH_IF=enp3s0".
+X64    ?= x64sc
+ETH_IF ?= $(shell ip route show default 2>/dev/null | awk '{print $$5; exit}')
+
+# Enable the Ethernet cartridge in RR-Net mode (mode 1) at $DE00 (56832),
+# using the pcap driver on the chosen interface.
+X64_ETH_OPTS := -ethernetcart -ethernetcartmode 1 -ethernetcartbase 56832 \
+                -ethernetiodriver pcap $(if $(ETH_IF),-ethernetioif $(ETH_IF))
 
 all: $(PRG)
 
@@ -37,7 +46,7 @@ ip65/ip65/Makefile ip65/drivers/Makefile:
 	@false
 
 run: $(PRG)
-	$(X64) -autostart $(PRG)
+	$(X64) $(X64_ETH_OPTS) -autostart $(PRG)
 
 clean:
 	rm -rf build $(PRG)

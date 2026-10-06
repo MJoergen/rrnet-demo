@@ -74,7 +74,21 @@ If this lists Ethernet options, the build has Ethernet support.
 
 ## 9. Enable the RR-Net in VICE
 
-Start `x64sc`, open **Settings → Cartridges / I/O extensions → Ethernet**, enable the RR-Net cartridge and select the host network interface.
+The Ethernet cartridge is disabled by default, so remember this step. Start `x64sc` and open **Settings → I/O extensions → Ethernet
+cartridge**. Tick **Enable**, set the mode to **RR-Net**, the base address to **$DE00**,
+the driver to **pcap**, and the interface to your wired network card (for example
+`enp3s0`). Then save the settings.
+
+The same settings on the command line are
+
+```bash
+x64sc -ethernetcart -ethernetcartmode 1 -ethernetcartbase 56832 \
+  -ethernetiodriver pcap -ethernetioif enp3s0
+```
+
+If VICE cannot open the network card (for example because step 6 was skipped, or the
+interface name is wrong) it silently leaves the cartridge disabled. Programs then report
+that no Ethernet chip was found.
 
 ## Notes
 

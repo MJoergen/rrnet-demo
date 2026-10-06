@@ -58,11 +58,31 @@ It then assembles the source files in `src/` and links everything into `rrnet-de
 Follow the [INSTALL.md](INSTALL.md) guide for instructions on how to install VICE on
 Ubuntu 24.04 LTS.
 
-Once VICE is set up with the RR-Net enabled, start the program with
+**Remember to enable the Ethernet cartridge in VICE.** It is off by default, and without it
+the program prints `RR-Net Initializing failed`. In `x64sc`, open **Settings → I/O
+extensions → Ethernet cartridge** and:
+* Tick **Enable**.
+* Set the mode to **RR-Net** and the base address to **$DE00**.
+* Set the driver to **pcap** and the interface to your wired network card (for example
+  `enp3s0`).
+
+Then save the settings, so VICE remembers them next time.
+
+To build and start the program type
 
 ```
 make run
 ```
+
+This also passes the Ethernet cartridge settings to `x64sc` on the command line, using the
+network interface of your default route. To use a different interface type for example
+`make run ETH_IF=enp3s0`.
+
+If the program still prints `RR-Net Initializing failed`, VICE could not open the network
+card and has left the cartridge disabled. Check that `getcap /usr/local/bin/x64sc` prints
+`cap_net_admin,cap_net_raw=eip` (see step 6 of [INSTALL.md](INSTALL.md)), and that the
+interface is a wired one. Running `x64sc` from a terminal shows VICE's log, which says why
+opening the interface failed.
 
 ## File overview of this repo
 * `README.md` : This file.
