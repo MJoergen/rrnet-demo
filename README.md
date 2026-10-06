@@ -13,8 +13,10 @@ This program serves an educational purpose of showing how to develop C64 program
 make use of the Internet.
 
 ## What can you do with this program?
-For now, this program is a simple port of the "ping" utility. You enter an IP address, and
-it will print out a line saying `reply from <ip address> after <num> seconds`.
+For now, this program is a simple port of the "ping" utility. When started, it gets an IP
+address from your local DHCP server and prints the network configuration. You then enter
+an IP address, and it will print out a line saying `Reply from <ip address> after <num> ms`.
+Press RETURN on an empty line to return to BASIC.
 
 ## What is RR-Net?
 RR-Net is a physical cartridge with an Ethernet (RJ45) connector that allows network
@@ -67,6 +69,6 @@ make run
 * `INSTALL.md` : How to build VICE with Ethernet support on Ubuntu 24.04 LTS.
 * `LICENSE` : The MIT license.
 * `Makefile` : Builds the ip65 libraries and `rrnet-demo.prg`.
-* `src/main.s` : The program source.
+* `src/main.s` : The program source (DHCP setup and the ping loop).
 * `ip65/` : The ip65 library (git submodule).
 * `.github/workflows/build.yml` : GitHub Actions job that checks the program builds.
