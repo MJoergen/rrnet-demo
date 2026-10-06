@@ -18,10 +18,13 @@ This avoids launching the wrong binary by accident.
 sudo apt update
 sudo apt install build-essential autoconf automake pkg-config byacc flex gawk \
   xa65 dos2unix texinfo libgtk-3-dev libglew-dev libpulse-dev libasound2-dev \
-  libpng-dev libgif-dev libcurl4-openssl-dev libevdev-dev libpcap-dev
+  libpng-dev libgif-dev libcurl4-openssl-dev libevdev-dev libpcap-dev libcap-dev
 ```
 
-`libpcap-dev` is the package that makes Ethernet support possible.
+`libpcap-dev` is the package that makes Ethernet support possible. `libcap-dev` lets VICE
+see the network permissions granted in step 6. Without it, VICE only uses pcap when run as
+root, and otherwise falls back to the "tuntap" driver, which fails with
+`ERROR transmitting frame: 'Input/output error'`.
 
 ## 3. Download and unpack the source
 
@@ -39,6 +42,13 @@ cd vice-3.9
 
 If `configure` stops with an error about a missing library, install the `-dev` package it names and run the command again.
 
+At the end, `configure` prints a summary. Check that it contains these two lines:
+
+```
+Network capture/injection support: yes
+POSIX 1003.1e capabilities support: yes
+```
+
 ## 5. Build and install
 
 ```bash
@@ -55,6 +65,9 @@ sudo setcap cap_net_raw,cap_net_admin=eip /usr/local/bin/x64sc
 ```
 
 Repeat this for any other emulator binary you want to use with Ethernet (for example `x128`).
+
+`make install` replaces the binary and removes these permissions, so repeat this step
+every time you rebuild VICE.
 
 ## 7. Clear the shell's command cache
 
