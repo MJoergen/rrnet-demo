@@ -8,6 +8,11 @@
 .include "common.inc"
 .include "commonprint.inc"
 .include "net.inc"
+.include "error.inc"
+
+.import ip65_error              ; Error code of the last failed call
+
+ping_retries = 20               ; Retries while waiting for ARP (~50 ms each)
 
 .import exit_to_basic
 
@@ -70,8 +75,23 @@
   dex
   bpl :-
 
+  ; The first ping to a new address usually fails with "transmit failed",
+  ; because ip65 must first look up the router's MAC address (ARP) and only
+  ; waits 50 ms for the answer. So retry a few times while the ARP reply
+  ; arrives.
+  lda #ping_retries
+  sta retry_count
+@ping:
   jsr icmp_ping                 ; Returns the round trip time in AX
-  bcs @no_reply
+  bcc @got_reply
+  lda ip65_error
+  cmp #IP65_ERROR_TRANSMIT_FAILED
+  bne @no_reply                 ; Other errors are not worth a retry
+  dec retry_count
+  bne @ping
+  jmp @no_reply
+
+@got_reply:
   stax ping_time
 
   ldax #reply_msg
@@ -92,7 +112,18 @@
   ldax #icmp_echo_ip
   jsr print_dotted_quad
   jsr print_cr
-  jsr print_errorcode           ; Explain why, e.g. timeout
+  lda ip65_error                ; Explain why
+  cmp #IP65_ERROR_TIMEOUT_ON_RECEIVE
+  bne :+
+  ldax #timeout_msg
+  jmp @print_reason
+: cmp #IP65_ERROR_TRANSMIT_FAILED
+  bne :+
+  ldax #no_arp_msg
+@print_reason:
+  jsr print_ascii_as_native
+  jmp @ask
+: jsr print_errorcode           ; Unknown error: print the code
   jmp @ask
 
 @exit:
@@ -108,8 +139,11 @@ reply_msg:    .byte "Reply from ", 0
 after_msg:    .byte " after ", 0
 ms_msg:       .byte " ms", 13, 0
 no_reply_msg: .byte "No reply from ", 0
+timeout_msg:  .byte "(timeout after 2 seconds)", 13, 0
+no_arp_msg:   .byte "(router did not answer ARP request)", 13, 0
 
 
 .bss
 
-ping_time: .res 2
+ping_time:   .res 2
+retry_count: .res 1
